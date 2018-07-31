@@ -1,0 +1,13 @@
+set -eux
+export PWS_USERNAME=$(lpass show "run.pivotal.io" --username)
+export PWS_PASSWORD=$(lpass show "run.pivotal.io" --password)
+
+cf api api.run.pivotal.io
+cf auth $PWS_USERNAME $PWS_PASSWORD
+cf target -o cf-lamb -s development
+
+GOOS=linux go build -o datadog-forwarder-edge
+cf push datadog-forwarder-edge \
+    -f pws-edge-manifest.yml \
+    --var CLIENT_SECRET=$(lpass show "Shared-CF- Log Cache (Pivotal ONLY)/pws-datadog-forwarder-client" --password) \
+    --var DATADOG_API_KEY=$(lpass show --note "Shared-CF- Log Cache (Pivotal ONLY)/pws-datadog-api-key" | jq .datadog_api_key)
