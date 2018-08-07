@@ -14,8 +14,6 @@ import (
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	logcache "code.cloudfoundry.org/go-log-cache"
 	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/datadog"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/groupmanager"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/sourceidprovider"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
 
@@ -25,63 +23,33 @@ func main() {
 	cfg := LoadConfig()
 	envstruct.WriteReport(&cfg)
 
-	fmt.Println("Creating groupClient for", cfg.LogCacheHTTPAddr)
-	groupClient := logcache.NewShardGroupReaderClient(
-		cfg.LogCacheHTTPAddr,
-		logcache.WithHTTPClient(newOauth2HTTPClient(cfg)),
-	)
-
 	fmt.Println("Creating client for", cfg.LogCacheHTTPAddr)
 	client := logcache.NewClient(
 		cfg.LogCacheHTTPAddr,
 		logcache.WithHTTPClient(newOauth2HTTPClient(cfg)),
 	)
 
-	if cfg.SourceIDWhitelist != "" && cfg.SourceIDBlacklist != "" {
-		log.Fatalf("Can't have a whitelist and a blacklist...")
+	if len(cfg.SourceIDList) == 0 {
+		log.Fatalf("Must provide a list of source IDs")
 	}
-
-	var provider groupmanager.GroupProvider = sourceidprovider.All(client)
-
-	if cfg.SourceIDBlacklist != "" {
-		fmt.Println("Creating blacklist", cfg.SourceIDBlacklist)
-		provider = sourceidprovider.NewRegex(
-			true,
-			cfg.SourceIDBlacklist,
-			client,
-		)
-	}
-
-	if cfg.SourceIDWhitelist != "" {
-		fmt.Println("Creating whitelist", cfg.SourceIDWhitelist)
-		provider = sourceidprovider.NewRegex(
-			false,
-			cfg.SourceIDWhitelist,
-			client,
-		)
-	}
-
-	groupmanager.Start(
-		cfg.LogCacheGroupName,
-		time.Tick(30*time.Second),
-		provider,
-		groupClient,
-	)
 
 	ddc := datadogapi.NewClient(cfg.DatadogAPIKey, "")
 	visitor := datadog.Visitor(ddc, cfg.MetricHost, strings.Split(cfg.DatadogTags, ","))
 
-	reader := groupClient.BuildReader(rand.Uint64())
+	for _, sourceId := range cfg.SourceIDList {
+		fmt.Println("Begrudgingly starting a walker for", sourceId)
+		go logcache.Walk(
+			context.Background(),
+			sourceId,
+			logcache.Visitor(visitor),
+			client.Read,
+			logcache.WithWalkStartTime(time.Now()),
+			logcache.WithWalkBackoff(logcache.NewAlwaysRetryBackoff(250*time.Millisecond)),
+			logcache.WithWalkLogger(log.New(os.Stderr, "", log.LstdFlags)),
+		)
+	}
 
-	logcache.Walk(
-		context.Background(),
-		cfg.LogCacheGroupName,
-		logcache.Visitor(visitor),
-		reader,
-		logcache.WithWalkStartTime(time.Now()),
-		logcache.WithWalkBackoff(logcache.NewAlwaysRetryBackoff(250*time.Millisecond)),
-		logcache.WithWalkLogger(log.New(os.Stderr, "", log.LstdFlags)),
-	)
+	http.ListenAndServe(":8080", nil)
 }
 
 func newOauth2HTTPClient(cfg Config) *logcache.Oauth2HTTPClient {
