@@ -20,8 +20,7 @@ type Config struct {
 	ClientID     string `env:"CLIENT_ID,       required"`
 	ClientSecret string `env:"CLIENT_SECRET,   required, noreport"`
 
-	LogCacheHTTPAddr  string `env:"LOG_CACHE_HTTP_ADDR,  required"`
-	LogCacheGroupName string `env:"LOG_CACHE_GROUP_NAME, required"`
+	LogCacheHTTPAddr string `env:"LOG_CACHE_HTTP_ADDR,  required"`
 
 	SkipCertVerify bool `env:"SKIP_CERT_VERIFY"`
 }
