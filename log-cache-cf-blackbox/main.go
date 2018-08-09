@@ -39,43 +39,47 @@ func main() {
 			currentTime := time.Now().UnixNano()
 
 			latencyResult := latencyTestRunner(cfg, httpClient)
-			latencyMetrics := []datadog.Metric{
-				{
-					Metric: metricName(cfg, "latency"),
-					Points: toDataPoint(currentTime, latencyResult.Latency),
-					Host:   &cfg.DatadogOriginHost,
-				},
-				{
-					Metric: metricName(cfg, "average_query_time"),
-					Points: toDataPoint(currentTime, latencyResult.AverageQueryTime),
-					Host:   &cfg.DatadogOriginHost,
-				},
-			}
+			if latencyResult != nil {
+				latencyMetrics := []datadog.Metric{
+					{
+						Metric: metricName(cfg, "latency"),
+						Points: toDataPoint(currentTime, latencyResult.Latency),
+						Host:   &cfg.DatadogOriginHost,
+					},
+					{
+						Metric: metricName(cfg, "average_query_time"),
+						Points: toDataPoint(currentTime, latencyResult.AverageQueryTime),
+						Host:   &cfg.DatadogOriginHost,
+					},
+				}
 
-			if err := ddc.PostMetrics(latencyMetrics); err != nil {
-				log.Printf("failed to write latency metrics to DataDog: %s", err)
-			} else {
-				log.Printf("posted %d latency metrics", len(latencyMetrics))
+				if err := ddc.PostMetrics(latencyMetrics); err != nil {
+					log.Printf("failed to write latency metrics to DataDog: %s", err)
+				} else {
+					log.Printf("posted %d latency metrics", len(latencyMetrics))
+				}
 			}
 
 			reliabilityResult := reliabilityTestRunner(cfg, httpClient)
-			reliabilityMetrics := []datadog.Metric{
-				{
-					Metric: metricName(cfg, "logs_sent"),
-					Points: toDataPoint(currentTime, float64(reliabilityResult.LogsSent)),
-					Host:   &cfg.DatadogOriginHost,
-				},
-				{
-					Metric: metricName(cfg, "logs_received"),
-					Points: toDataPoint(currentTime, float64(reliabilityResult.LogsReceived)),
-					Host:   &cfg.DatadogOriginHost,
-				},
-			}
+			if reliabilityResult != nil {
+				reliabilityMetrics := []datadog.Metric{
+					{
+						Metric: metricName(cfg, "logs_sent"),
+						Points: toDataPoint(currentTime, float64(reliabilityResult.LogsSent)),
+						Host:   &cfg.DatadogOriginHost,
+					},
+					{
+						Metric: metricName(cfg, "logs_received"),
+						Points: toDataPoint(currentTime, float64(reliabilityResult.LogsReceived)),
+						Host:   &cfg.DatadogOriginHost,
+					},
+				}
 
-			if err := ddc.PostMetrics(reliabilityMetrics); err != nil {
-				log.Printf("failed to write reliability metrics to DataDog: %s", err)
-			} else {
-				log.Printf("posted %d reliability metrics", len(reliabilityMetrics))
+				if err := ddc.PostMetrics(reliabilityMetrics); err != nil {
+					log.Printf("failed to write reliability metrics to DataDog: %s", err)
+				} else {
+					log.Printf("posted %d reliability metrics", len(reliabilityMetrics))
+				}
 			}
 
 			// groupLatencyTestRunner(cfg, httpClient, 10)
