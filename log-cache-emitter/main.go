@@ -10,7 +10,7 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/log-cache/rpc/logcache_v1"
+	"code.cloudfoundry.org/log-cache/pkg/rpc/logcache_v1"
 	"google.golang.org/grpc"
 )
 
