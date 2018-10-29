@@ -40,7 +40,6 @@ func Visitor(c Client, host string, tags []string) func(points []*metricstore_v1
 		}
 
 		if len(metrics) > 0 {
-			fmt.Printf("Attempting to post metrics: %+v\n", metrics)
 			err := c.PostMetrics(metrics)
 			if err != nil {
 				log.Printf("failed to write metrics to DataDog: %s", err)

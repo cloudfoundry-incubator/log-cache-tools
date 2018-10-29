@@ -1,7 +1,7 @@
 package datadog_test
 
 import (
-	"github.com/cloudfoundry-incubator/log-cache-tools/datadog-forwarder/datadog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
 	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
 

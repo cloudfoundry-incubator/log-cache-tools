@@ -12,7 +12,7 @@ import (
 	"time"
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
-	"github.com/cloudfoundry-incubator/log-cache-tools/datadog-forwarder/datadog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
 	"github.com/pivotal/metric-store/pkg/client"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
