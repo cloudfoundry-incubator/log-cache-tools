@@ -20,13 +20,14 @@ func Visitor(c Client, host string, tags []string) func(points []*metricstore_v1
 		for _, point := range points {
 			ddtags := append(make([]string, 0), tags...)
 
-			for key, value := range point.GetTags() {
+			tags := point.GetTags()
+			for key, value := range tags {
 				ddtags = append(ddtags, key+":"+value)
 			}
 
 			name := point.GetName()
-			if point.GetSourceId() != "" {
-				name = fmt.Sprintf("%s.%s", point.GetSourceId(), name)
+			if tags["source_id"] != "" {
+				name = fmt.Sprintf("%s.%s", tags["source_id"], name)
 			}
 
 			mType := "gauge"

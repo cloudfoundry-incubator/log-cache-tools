@@ -42,7 +42,6 @@ func main() {
 			go metricstore_client.Walk(
 				context.Background(),
 				metricName,
-				sourceId,
 				metricstore_client.Visitor(visitor),
 				client.Read,
 				metricstore_client.WithWalkStartTime(time.Now()),

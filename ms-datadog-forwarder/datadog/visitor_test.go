@@ -51,9 +51,9 @@ var _ = Describe("Visitor", func() {
 		visitor([]*metricstore_v1.Point{
 			{
 				Timestamp: 1000000000,
-				SourceId:  "counter-id-1",
 				Name:      "counter-a",
 				Value:     123,
+				Tags:      map[string]string{"source_id": "counter-id-1"},
 			},
 		})
 		m := ddc.metrics[0]
