@@ -7,22 +7,22 @@ import (
 )
 
 type Config struct {
-	SourceIDList []string `env:"SOURCE_ID_LIST"`
+	SourceIDList []string `env:"SOURCE_ID_LIST,report"`
 
-	DatadogAPIKey string `env:"DATADOG_API_KEY, required, noreport"`
-	MetricHost    string `env:"METRIC_HOST, required"`
+	DatadogAPIKey string `env:"DATADOG_API_KEY,required"`
+	MetricHost    string `env:"METRIC_HOST,required,report"`
 
 	// DatadogTags are a comma separated list of tags to be set on each
 	// metric.
-	DatadogTags string `env:"DATADOG_TAGS"`
+	DatadogTags string `env:"DATADOG_TAGS,report"`
 
-	UAAAddr      string `env:"UAA_ADDR,        required"`
-	ClientID     string `env:"CLIENT_ID,       required"`
-	ClientSecret string `env:"CLIENT_SECRET,   required, noreport"`
+	UAAAddr      string `env:"UAA_ADDR,required,report"`
+	ClientID     string `env:"CLIENT_ID,required,report"`
+	ClientSecret string `env:"CLIENT_SECRET,required"`
 
-	LogCacheHTTPAddr string `env:"LOG_CACHE_HTTP_ADDR,  required"`
+	LogCacheHTTPAddr string `env:"LOG_CACHE_HTTP_ADDR,required,report"`
 
-	SkipCertVerify bool `env:"SKIP_CERT_VERIFY"`
+	SkipCertVerify bool `env:"SKIP_CERT_VERIFY,report"`
 }
 
 func LoadConfig() Config {
