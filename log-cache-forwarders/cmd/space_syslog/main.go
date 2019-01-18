@@ -13,12 +13,12 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	logcache "code.cloudfoundry.org/go-log-cache"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/cmd/space_syslog/internal/logcacheutil"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/expvarfilter"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/groupmanager"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/metrics"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/sourceidprovider"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/cmd/space_syslog/internal/logcacheutil"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/expvarfilter"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/groupmanager"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/metrics"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/sourceidprovider"
 )
 
 const metricsNamespace = "SpaceSyslogForwarder"

@@ -2,7 +2,7 @@ package logcacheutil_test
 
 import (
 	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/cmd/space_syslog/internal/logcacheutil"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/cmd/space_syslog/internal/logcacheutil"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

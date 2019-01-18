@@ -3,7 +3,7 @@ package syslog_test
 import (
 	"net/url"
 
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

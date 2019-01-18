@@ -13,30 +13,30 @@ type Client interface {
 	PostMetrics(m []datadog.Metric) error
 }
 
-func Visitor(c Client, host string, tags []string) func(points []*metricstore_v1.Point) bool {
+func NewPointWriter(c Client, host string, staticTags []string) func(points []*metricstore_v1.Point) bool {
 	return func(points []*metricstore_v1.Point) bool {
 		var metrics []datadog.Metric
 
 		for _, point := range points {
-			ddtags := append(make([]string, 0), tags...)
+			datadogTags := append(make([]string, 0), staticTags...)
 
-			tags := point.GetTags()
-			for key, value := range tags {
-				ddtags = append(ddtags, key+":"+value)
+			labels := point.GetLabels()
+			for labelName, labelValue := range labels {
+				datadogTags = append(datadogTags, labelName+":"+labelValue)
 			}
 
-			name := point.GetName()
-			if tags["source_id"] != "" {
-				name = fmt.Sprintf("%s.%s", tags["source_id"], name)
+			metricName := point.GetName()
+			if labels["source_id"] != "" {
+				metricName = fmt.Sprintf("%s.%s", labels["source_id"], metricName)
 			}
 
-			mType := "gauge"
+			metricType := "gauge"
 			metrics = append(metrics, datadog.Metric{
-				Metric: &name,
+				Metric: &metricName,
 				Points: toDataPoint(point.Timestamp, point.GetValue()),
-				Type:   &mType,
+				Type:   &metricType,
 				Host:   &host,
-				Tags:   ddtags,
+				Tags:   datadogTags,
 			})
 		}
 

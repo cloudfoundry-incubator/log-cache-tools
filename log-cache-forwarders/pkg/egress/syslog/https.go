@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog/config"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog/config"
 )
 
 // NetworkTimeoutConfig stores various timeout values.

@@ -9,12 +9,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Visitor", func() {
+var _ = Describe("NewPointWriter", func() {
 	It("writes points to the datadog client", func() {
-		ddc := &stubDatadogClient{}
-		visitor := datadog.Visitor(ddc, "hostname", []string{"tag-1", "tag-2"})
+		datadogClient := &stubDatadogClient{}
+		writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{"tag-1", "tag-2"})
 
-		cont := visitor([]*metricstore_v1.Point{
+		cont := writePoints([]*metricstore_v1.Point{
 			{
 				Timestamp: 1000000000,
 				Name:      "counter-a",
@@ -28,9 +28,9 @@ var _ = Describe("Visitor", func() {
 		})
 
 		Expect(cont).To(BeTrue())
-		Expect(ddc.metrics).To(HaveLen(2))
+		Expect(datadogClient.metrics).To(HaveLen(2))
 
-		m := ddc.metrics[0]
+		m := datadogClient.metrics[0]
 		Expect(*m.Type).To(Equal("gauge"))
 		Expect(*m.Metric).To(Equal("counter-a"))
 		Expect(*m.Host).To(Equal("hostname"))
@@ -44,30 +44,32 @@ var _ = Describe("Visitor", func() {
 		Expect(*p[1]).To(Equal(float64(123)))
 	})
 
-	It("metric name includes source id if present", func() {
-		ddc := &stubDatadogClient{}
-		visitor := datadog.Visitor(ddc, "hostname", []string{})
+	Context("when source_id is present on the Point", func() {
+		It("write points with a metric name that includes the source id", func() {
+			datadogClient := &stubDatadogClient{}
+			writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{})
 
-		visitor([]*metricstore_v1.Point{
-			{
-				Timestamp: 1000000000,
-				Name:      "counter-a",
-				Value:     123,
-				Tags:      map[string]string{"source_id": "counter-id-1"},
-			},
+			writePoints([]*metricstore_v1.Point{
+				{
+					Timestamp: 1000000000,
+					Name:      "counter-a",
+					Value:     123,
+					Labels:    map[string]string{"source_id": "counter-id-1"},
+				},
+			})
+			m := datadogClient.metrics[0]
+			Expect(*m.Metric).To(Equal("counter-id-1.counter-a"))
 		})
-		m := ddc.metrics[0]
-		Expect(*m.Metric).To(Equal("counter-id-1.counter-a"))
 	})
 
-	Context("when envelopes is empty", func() {
+	Context("when envelopes are empty", func() {
 		It("does not post metrics", func() {
-			ddc := &stubDatadogClient{}
-			visitor := datadog.Visitor(ddc, "hostname", []string{})
+			datadogClient := &stubDatadogClient{}
+			writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{})
 
-			visitor(nil)
+			writePoints(nil)
 
-			Expect(ddc.postMetricsCalled).To(BeFalse())
+			Expect(datadogClient.postMetricsCalled).To(BeFalse())
 		})
 	})
 })

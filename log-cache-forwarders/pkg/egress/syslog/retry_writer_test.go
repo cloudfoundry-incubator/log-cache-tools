@@ -9,7 +9,7 @@ import (
 
 	loggregator "code.cloudfoundry.org/go-loggregator"
 	v2 "code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog"
 	"golang.org/x/net/context"
 
 	. "github.com/onsi/ginkgo"

@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	rpc "code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/sourceidprovider"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/sourceidprovider"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

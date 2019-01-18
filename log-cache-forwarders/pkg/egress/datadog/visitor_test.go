@@ -2,7 +2,7 @@ package datadog_test
 
 import (
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/datadog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/datadog"
 	datadogapi "github.com/zorkian/go-datadog-api"
 
 	. "github.com/onsi/ginkgo"

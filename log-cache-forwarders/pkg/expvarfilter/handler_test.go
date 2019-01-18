@@ -3,7 +3,7 @@ package expvarfilter_test
 import (
 	"fmt"
 
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/expvarfilter"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/expvarfilter"
 
 	"net/http"
 	"net/http/httptest"

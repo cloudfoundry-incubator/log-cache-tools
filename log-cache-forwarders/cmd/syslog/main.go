@@ -10,11 +10,12 @@ import (
 	"os"
 	"time"
 
+	egress "github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog"
+
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	logcache "code.cloudfoundry.org/go-log-cache"
-	egress "code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/expvarfilter"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/metrics"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/expvarfilter"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/metrics"
 )
 
 const metricsNamespace = "SyslogForwarder"

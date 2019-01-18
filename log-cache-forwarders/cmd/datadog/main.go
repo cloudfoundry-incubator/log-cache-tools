@@ -12,9 +12,9 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	logcache "code.cloudfoundry.org/go-log-cache"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/datadog"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/groupmanager"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/sourceidprovider"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/datadog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/groupmanager"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/sourceidprovider"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
 

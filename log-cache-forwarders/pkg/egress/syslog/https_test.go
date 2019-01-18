@@ -7,7 +7,7 @@ import (
 	"net/url"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog"
 	"code.cloudfoundry.org/rfc5424"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

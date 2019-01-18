@@ -1,7 +1,7 @@
 package sourceidprovider_test
 
 import (
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/sourceidprovider"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/sourceidprovider"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

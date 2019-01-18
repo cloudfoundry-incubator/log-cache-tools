@@ -7,13 +7,13 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
-	"github.com/pivotal/metric-store/pkg/client"
+	metricstore_client "github.com/pivotal/metric-store/pkg/client"
+	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
 
@@ -33,25 +33,44 @@ func main() {
 		log.Fatalf("Must provide a set of forwarded metrics")
 	}
 
-	ddc := datadogapi.NewClient(cfg.DatadogAPIKey, "")
-	visitor := datadog.Visitor(ddc, cfg.MetricHost, strings.Split(cfg.DatadogTags, ","))
+	datadogClient := datadogapi.NewClient(cfg.DatadogAPIKey, "")
+	writePoints := datadog.NewPointWriter(datadogClient, cfg.MetricHost, strings.Split(cfg.DatadogTags, ","))
 
-	for sourceId, associatedMetrics := range cfg.ForwardedMetrics {
+	for _, associatedMetrics := range cfg.ForwardedMetrics {
 		for _, metricName := range associatedMetrics {
-			fmt.Println("Begrudgingly starting a walker for", sourceId, metricName)
-			go metricstore_client.Walk(
-				context.Background(),
-				metricName,
-				metricstore_client.Visitor(visitor),
-				client.Read,
-				metricstore_client.WithWalkStartTime(time.Now()),
-				metricstore_client.WithWalkBackoff(metricstore_client.NewAlwaysRetryBackoff(250*time.Millisecond)),
-				metricstore_client.WithWalkLogger(log.New(os.Stderr, "", log.LstdFlags)),
-			)
+			go Walk(client, metricName, writePoints)
 		}
 	}
 
 	http.ListenAndServe(":8080", nil)
+}
+
+func Walk(client *metricstore_client.Client, metricName string, writePointsToDatadog func([]*metricstore_v1.Point) bool) {
+	startTime := time.Now().Add(-time.Minute)
+
+	for {
+		time.Sleep(time.Second)
+		ctx, _ := context.WithTimeout(context.Background(), time.Second)
+		points, err := client.Read(
+			ctx,
+			metricName,
+			startTime,
+			metricstore_client.WithEndTime(time.Now().Add(-5*time.Second)),
+		)
+
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		if len(points) == 0 {
+			continue
+		}
+
+		log.Printf("Writing %d point(s) for %s", len(points), metricName)
+		writePointsToDatadog(points)
+		startTime = time.Unix(0, points[len(points)-1].GetTimestamp()+1)
+	}
 }
 
 func newOauth2HTTPClient(cfg Config) *metricstore_client.Oauth2HTTPClient {

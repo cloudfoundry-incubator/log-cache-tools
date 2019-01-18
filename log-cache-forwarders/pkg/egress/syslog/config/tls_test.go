@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"code.cloudfoundry.org/loggregator-tools/log-cache-forwarders/pkg/egress/syslog/config"
+	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/syslog/config"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
