@@ -6,55 +6,63 @@ import (
 	"time"
 
 	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
-	datadog "github.com/zorkian/go-datadog-api"
+	datadogapi "github.com/zorkian/go-datadog-api"
 )
 
 type Client interface {
-	PostMetrics(m []datadog.Metric) error
+	PostMetrics(m []datadogapi.Metric) error
 }
 
-func NewPointWriter(c Client, host string, staticTags []string) func(points []*metricstore_v1.Point) bool {
-	return func(points []*metricstore_v1.Point) bool {
-		var metrics []datadog.Metric
+func NewPointWriter(c Client, host string, staticTags []string) func(*metricstore_v1.PromQL_Series) time.Time {
+	return func(series *metricstore_v1.PromQL_Series) time.Time {
+		var metricName string
 
+		datadogTags := append(make([]string, 0), staticTags...)
+		labels := series.GetMetric()
+		for labelName, labelValue := range labels {
+			if labelName == "__name__" {
+				metricName = labelValue
+				continue
+			}
+			datadogTags = append(datadogTags, labelName+":"+labelValue)
+		}
+
+		if labels["source_id"] != "" {
+			metricName = fmt.Sprintf("%s.%s", labels["source_id"], metricName)
+		}
+
+		points := series.GetPoints()
+		var ps []datadogapi.DataPoint
 		for _, point := range points {
-			datadogTags := append(make([]string, 0), staticTags...)
+			ps = append(ps, toDataPoint(point.GetTime(), point.GetValue()))
+		}
 
-			labels := point.GetLabels()
-			for labelName, labelValue := range labels {
-				datadogTags = append(datadogTags, labelName+":"+labelValue)
-			}
-
-			metricName := point.GetName()
-			if labels["source_id"] != "" {
-				metricName = fmt.Sprintf("%s.%s", labels["source_id"], metricName)
-			}
-
+		latestTime := time.Unix(0, 0)
+		if len(ps) > 0 {
 			metricType := "gauge"
-			metrics = append(metrics, datadog.Metric{
+			metrics := []datadogapi.Metric{{
 				Metric: &metricName,
-				Points: toDataPoint(point.Timestamp, point.GetValue()),
+				Points: ps,
 				Type:   &metricType,
 				Host:   &host,
 				Tags:   datadogTags,
-			})
-		}
+			}}
+			log.Printf("Writing %d point(s)", len(metrics))
 
-		if len(metrics) > 0 {
 			err := c.PostMetrics(metrics)
 			if err != nil {
 				log.Printf("failed to write metrics to DataDog: %s", err)
 			}
+
+			latestTime = time.Unix(0, points[len(points)-1].GetTime()*int64(time.Millisecond))
 		}
 
-		return true
+		return latestTime
 	}
 }
 
-func toDataPoint(x int64, y float64) []datadog.DataPoint {
-	t := time.Unix(0, x)
+func toDataPoint(timeInMilliseconds int64, value float64) datadogapi.DataPoint {
+	t := time.Unix(0, timeInMilliseconds*int64(time.Millisecond))
 	tf := float64(t.Unix())
-	return []datadog.DataPoint{
-		[2]*float64{&tf, &y},
-	}
+	return datadogapi.DataPoint{&tf, &value}
 }

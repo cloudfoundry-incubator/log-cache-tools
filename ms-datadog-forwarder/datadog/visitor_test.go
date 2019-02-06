@@ -1,6 +1,8 @@
 package datadog_test
 
 import (
+	"time"
+
 	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
 	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
@@ -9,25 +11,41 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("NewPointWriter", func() {
+var _ = Describe("NewPointWriter()", func() {
 	It("writes points to the datadog client", func() {
 		datadogClient := &stubDatadogClient{}
 		writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{"tag-1", "tag-2"})
 
-		cont := writePoints([]*metricstore_v1.Point{
-			{
-				Timestamp: 1000000000,
-				Name:      "counter-a",
-				Value:     123,
+		latestTime := writePoints(&metricstore_v1.PromQL_Series{
+			Metric: map[string]string{
+				"__name__": "counter-a",
 			},
-			{
-				Timestamp: 1000000000,
-				Name:      "counter-b",
-				Value:     456,
+			Points: []*metricstore_v1.PromQL_Point{
+				{
+					Time:  1000*int64(time.Millisecond),
+					Value: 123,
+				},
+				{
+					Time:  3000,
+					Value: 456,
+				},
 			},
 		})
+		Expect(latestTime).To(Equal(time.Unix(3, 0)))
 
-		Expect(cont).To(BeTrue())
+		latestTime = writePoints(&metricstore_v1.PromQL_Series{
+			Metric: map[string]string{
+				"__name__": "counter-b",
+			},
+			Points: []*metricstore_v1.PromQL_Point{
+				{
+					Time:  1000,
+					Value: 456,
+				},
+			},
+		})
+		Expect(latestTime).To(Equal(time.Unix(1, 0)))
+
 		Expect(datadogClient.metrics).To(HaveLen(2))
 
 		m := datadogClient.metrics[0]
@@ -36,7 +54,7 @@ var _ = Describe("NewPointWriter", func() {
 		Expect(*m.Host).To(Equal("hostname"))
 		Expect(m.Tags).To(ConsistOf("tag-1", "tag-2"))
 
-		Expect(m.Points).To(HaveLen(1))
+		Expect(m.Points).To(HaveLen(2))
 
 		p := m.Points[0]
 
@@ -49,14 +67,19 @@ var _ = Describe("NewPointWriter", func() {
 			datadogClient := &stubDatadogClient{}
 			writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{})
 
-			writePoints([]*metricstore_v1.Point{
-				{
-					Timestamp: 1000000000,
-					Name:      "counter-a",
-					Value:     123,
-					Labels:    map[string]string{"source_id": "counter-id-1"},
+			writePoints(&metricstore_v1.PromQL_Series{
+				Metric: map[string]string{
+					"__name__":  "counter-a",
+					"source_id": "counter-id-1",
+				},
+				Points: []*metricstore_v1.PromQL_Point{
+					{
+						Time:  1000,
+						Value: 123,
+					},
 				},
 			})
+
 			m := datadogClient.metrics[0]
 			Expect(*m.Metric).To(Equal("counter-id-1.counter-a"))
 		})
@@ -67,9 +90,13 @@ var _ = Describe("NewPointWriter", func() {
 			datadogClient := &stubDatadogClient{}
 			writePoints := datadog.NewPointWriter(datadogClient, "hostname", []string{})
 
-			writePoints(nil)
-
+			latestTime := writePoints(&metricstore_v1.PromQL_Series{})
 			Expect(datadogClient.postMetricsCalled).To(BeFalse())
+			Expect(latestTime).To(Equal(time.Unix(0, 0)))
+
+			latestTime = writePoints(nil)
+			Expect(datadogClient.postMetricsCalled).To(BeFalse())
+			Expect(latestTime).To(Equal(time.Unix(0, 0)))
 		})
 	})
 })

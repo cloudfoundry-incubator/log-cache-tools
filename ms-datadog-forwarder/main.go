@@ -45,17 +45,20 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func Walk(client *metricstore_client.Client, metricName string, writePointsToDatadog func([]*metricstore_v1.Point) bool) {
+func Walk(client *metricstore_client.Client, query string, writePointsToDatadog func(*metricstore_v1.PromQL_Series) time.Time) {
 	startTime := time.Now().Add(-time.Minute)
 
 	for {
 		time.Sleep(time.Second)
 		ctx, _ := context.WithTimeout(context.Background(), time.Second)
-		points, err := client.Read(
+
+		log.Printf("Querying for blackbox metrics with: %s", query)
+		res, err := client.PromQLRange(
 			ctx,
-			metricName,
-			startTime,
-			metricstore_client.WithEndTime(time.Now().Add(-5*time.Second)),
+			query,
+			metricstore_client.WithPromQLStart(startTime),
+			metricstore_client.WithPromQLEnd(time.Now().Add(-5*time.Second)),
+			metricstore_client.WithPromQLStep("1s"),
 		)
 
 		if err != nil {
@@ -63,13 +66,14 @@ func Walk(client *metricstore_client.Client, metricName string, writePointsToDat
 			continue
 		}
 
-		if len(points) == 0 {
-			continue
-		}
+		var latestTime time.Time
+		for _, series := range res.GetMatrix().GetSeries() {
+			latestTime = writePointsToDatadog(series)
 
-		log.Printf("Writing %d point(s) for %s", len(points), metricName)
-		writePointsToDatadog(points)
-		startTime = time.Unix(0, points[len(points)-1].GetTimestamp()+1)
+			if startTime.Before(latestTime) {
+				startTime = latestTime
+			}
+		}
 	}
 }
 
