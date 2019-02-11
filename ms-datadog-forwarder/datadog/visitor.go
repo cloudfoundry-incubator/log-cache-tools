@@ -54,7 +54,7 @@ func NewPointWriter(c Client, host string, staticTags []string) func(*metricstor
 				log.Printf("failed to write metrics to DataDog: %s", err)
 			}
 
-			latestTime = time.Unix(0, points[len(points)-1].GetTime()*int64(time.Millisecond))
+			latestTime = MillisecondsToTime(points[len(points)-1].GetTime())
 		}
 
 		return latestTime
@@ -62,7 +62,14 @@ func NewPointWriter(c Client, host string, staticTags []string) func(*metricstor
 }
 
 func toDataPoint(timeInMilliseconds int64, value float64) datadogapi.DataPoint {
-	t := time.Unix(0, timeInMilliseconds*int64(time.Millisecond))
-	tf := float64(t.Unix())
+	tf := float64(MillisecondsToSeconds(timeInMilliseconds))
 	return datadogapi.DataPoint{&tf, &value}
+}
+
+func MillisecondsToTime(ms int64) time.Time {
+	return time.Unix(0, ms*int64(time.Millisecond))
+}
+
+func MillisecondsToSeconds(ms int64) int64 {
+	return ms * int64(time.Second/time.Millisecond)
 }

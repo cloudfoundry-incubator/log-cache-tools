@@ -1,8 +1,6 @@
 package datadog_test
 
 import (
-	"time"
-
 	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
 	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
@@ -22,7 +20,7 @@ var _ = Describe("NewPointWriter()", func() {
 			},
 			Points: []*metricstore_v1.PromQL_Point{
 				{
-					Time:  1000*int64(time.Millisecond),
+					Time:  1000,
 					Value: 123,
 				},
 				{
@@ -31,7 +29,7 @@ var _ = Describe("NewPointWriter()", func() {
 				},
 			},
 		})
-		Expect(latestTime).To(Equal(time.Unix(3, 0)))
+		Expect(latestTime).To(Equal(datadog.MillisecondsToTime(3000)))
 
 		latestTime = writePoints(&metricstore_v1.PromQL_Series{
 			Metric: map[string]string{
@@ -44,7 +42,7 @@ var _ = Describe("NewPointWriter()", func() {
 				},
 			},
 		})
-		Expect(latestTime).To(Equal(time.Unix(1, 0)))
+		Expect(latestTime).To(Equal(datadog.MillisecondsToTime(1000)))
 
 		Expect(datadogClient.metrics).To(HaveLen(2))
 
@@ -58,7 +56,7 @@ var _ = Describe("NewPointWriter()", func() {
 
 		p := m.Points[0]
 
-		Expect(*p[0]).To(Equal(float64(1)))
+		Expect(*p[0]).To(Equal(float64(datadog.MillisecondsToSeconds(1000))))
 		Expect(*p[1]).To(Equal(float64(123)))
 	})
 
@@ -92,11 +90,11 @@ var _ = Describe("NewPointWriter()", func() {
 
 			latestTime := writePoints(&metricstore_v1.PromQL_Series{})
 			Expect(datadogClient.postMetricsCalled).To(BeFalse())
-			Expect(latestTime).To(Equal(time.Unix(0, 0)))
+			Expect(latestTime).To(Equal(datadog.MillisecondsToTime(0)))
 
 			latestTime = writePoints(nil)
 			Expect(datadogClient.postMetricsCalled).To(BeFalse())
-			Expect(latestTime).To(Equal(time.Unix(0, 0)))
+			Expect(latestTime).To(Equal(datadog.MillisecondsToTime(0)))
 		})
 	})
 })

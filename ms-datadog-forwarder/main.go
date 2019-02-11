@@ -71,7 +71,7 @@ func Walk(client *metricstore_client.Client, query string, writePointsToDatadog 
 			latestTime = writePointsToDatadog(series)
 
 			if startTime.Before(latestTime) {
-				startTime = latestTime
+				startTime = latestTime.Add(time.Millisecond)
 			}
 		}
 	}
