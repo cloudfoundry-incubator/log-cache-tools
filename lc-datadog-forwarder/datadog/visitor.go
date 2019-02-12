@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	datadog "github.com/zorkian/go-datadog-api"
+	datadogapi "github.com/zorkian/go-datadog-api"
 )
 
 type Client interface {
-	PostMetrics(m []datadog.Metric) error
-	PostEvent(e *datadog.Event) (*datadog.Event, error)
+	PostMetrics(m []datadogapi.Metric) error
+	PostEvent(e *datadogapi.Event) (*datadogapi.Event, error)
 }
 
 func Visitor(c Client, host string, tags []string) func(es []*loggregator_v2.Envelope) bool {
 	return func(es []*loggregator_v2.Envelope) bool {
-		var metrics []datadog.Metric
-		var events []*datadog.Event
+		var metrics []datadogapi.Metric
+		var events []*datadogapi.Event
 
 		for _, e := range es {
 			ddtags := append(make([]string, 0), tags...)
@@ -37,7 +37,7 @@ func Visitor(c Client, host string, tags []string) func(es []*loggregator_v2.Env
 					}
 
 					mType := "gauge"
-					metrics = append(metrics, datadog.Metric{
+					metrics = append(metrics, datadogapi.Metric{
 						Metric: &name,
 						Points: toDataPoint(e.Timestamp, value.GetValue()),
 						Type:   &mType,
@@ -52,7 +52,7 @@ func Visitor(c Client, host string, tags []string) func(es []*loggregator_v2.Env
 				}
 
 				mType := "gauge"
-				metrics = append(metrics, datadog.Metric{
+				metrics = append(metrics, datadogapi.Metric{
 					Metric: &name,
 					Points: toDataPoint(e.Timestamp, float64(e.GetCounter().GetTotal())),
 					Type:   &mType,
@@ -64,7 +64,7 @@ func Visitor(c Client, host string, tags []string) func(es []*loggregator_v2.Env
 				title := event.GetTitle()
 				text := event.GetBody()
 
-				events = append(events, &datadog.Event{
+				events = append(events, &datadogapi.Event{
 					Title: &title,
 					Text:  &text,
 					Host:  &host,
@@ -106,10 +106,10 @@ func Visitor(c Client, host string, tags []string) func(es []*loggregator_v2.Env
 	}
 }
 
-func toDataPoint(x int64, y float64) []datadog.DataPoint {
+func toDataPoint(x int64, y float64) []datadogapi.DataPoint {
 	t := time.Unix(0, x)
 	tf := float64(t.Unix())
-	return []datadog.DataPoint{
+	return []datadogapi.DataPoint{
 		[2]*float64{&tf, &y},
 	}
 }

@@ -2,7 +2,7 @@ package datadog_test
 
 import (
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
-	"github.com/cloudfoundry-incubator/log-cache-tools/log-cache-forwarders/pkg/egress/datadog"
+	"github.com/cloudfoundry-incubator/log-cache-tools/lc-datadog-forwarder/datadog"
 	datadogapi "github.com/zorkian/go-datadog-api"
 
 	. "github.com/onsi/ginkgo"
@@ -59,8 +59,8 @@ var _ = Describe("Visitor", func() {
 
 			cont := visitor([]*loggregator_v2.Envelope{
 				{
-					Timestamp:      1000000000,
-					Tags:           map[string]string{
+					Timestamp: 1000000000,
+					Tags: map[string]string{
 						"event_origin": "doppler",
 					},
 					Message: &loggregator_v2.Envelope_Event{
