@@ -2,7 +2,7 @@ package datadog_test
 
 import (
 	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
-	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
+	"github.com/cloudfoundry/metric-store-release/src/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
 
 	. "github.com/onsi/ginkgo"

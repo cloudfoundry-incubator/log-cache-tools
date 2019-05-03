@@ -12,8 +12,8 @@ import (
 
 	envstruct "code.cloudfoundry.org/go-envstruct"
 	"github.com/cloudfoundry-incubator/log-cache-tools/ms-datadog-forwarder/datadog"
-	metricstore_client "github.com/pivotal/metric-store/pkg/client"
-	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
+	metricstore_client "github.com/cloudfoundry/metric-store-release/src/pkg/client"
+	"github.com/cloudfoundry/metric-store-release/src/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/pivotal/metric-store/pkg/rpc/metricstore_v1"
+	"github.com/cloudfoundry/metric-store-release/src/pkg/rpc/metricstore_v1"
 	datadogapi "github.com/zorkian/go-datadog-api"
 )
 
