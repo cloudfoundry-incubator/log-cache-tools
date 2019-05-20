@@ -47,7 +47,7 @@ func NewPointWriter(c Client, host string, staticTags []string) func(*metricstor
 				Host:   &host,
 				Tags:   datadogTags,
 			}}
-			log.Printf("Writing %d point(s)", len(metrics))
+			log.Printf("Writing one batch of %d points", len(metrics[0].Points))
 
 			err := c.PostMetrics(metrics)
 			if err != nil {
@@ -62,7 +62,7 @@ func NewPointWriter(c Client, host string, staticTags []string) func(*metricstor
 }
 
 func toDataPoint(timeInMilliseconds int64, value float64) datadogapi.DataPoint {
-	tf := float64(MillisecondsToSeconds(timeInMilliseconds))
+	tf := MillisecondsToSeconds(timeInMilliseconds)
 	return datadogapi.DataPoint{&tf, &value}
 }
 
@@ -70,6 +70,6 @@ func MillisecondsToTime(ms int64) time.Time {
 	return time.Unix(0, ms*int64(time.Millisecond))
 }
 
-func MillisecondsToSeconds(ms int64) int64 {
-	return ms * int64(time.Second/time.Millisecond)
+func MillisecondsToSeconds(ms int64) float64 {
+	return float64(ms / 1000)
 }
